@@ -1,3 +1,5 @@
+
+
 var DEBUG = false;
 var SPEED = 180;
 var GRAVITY = 18;
@@ -97,7 +99,7 @@ function create() {
     credits = game.add.text(
         game.world.width / 2,
         10,
-        'marksteve.com/dtmb\n@themarksteve',
+        'github.com/cederw',
         {
             font: '8px "Press Start 2P"',
             fill: '#fff',
@@ -170,13 +172,14 @@ function create() {
     scoreSnd = game.add.audio('score');
     hurtSnd = game.add.audio('hurt');
     // Add controls
-    game.input.onDown.add(flap);
+    //game.input.onDown.add(flap);
     game.input.keyboard.addCallbacks(game, onKeyDown, onKeyUp);
     // Start clouds timer
     cloudsTimer = new Phaser.Timer(game);
     cloudsTimer.onEvent.add(spawnCloud);
     cloudsTimer.start();
     cloudsTimer.add(Math.random());
+    makeVoice();
     // RESET!
     reset();
 }
@@ -186,8 +189,8 @@ function reset() {
     gameOver = false;
     score = 0;
     credits.renderable = true;
-    scoreText.setText("DON'T\nTOUCH\nMY\nBIRDIE");
-    instText.setText("TOUCH TO FLAP\nBIRDIE WINGS");
+    scoreText.setText("DON'T\nYELL AT\nMY\nBIRDIE");
+    instText.setText("SAY JUMP TO FLAP\nBIRDIE WINGS");
     gameOverText.renderable = false;
     birdie.body.allowGravity = false;
     birdie.angle = 0;
@@ -218,7 +221,7 @@ function flap() {
         start();
     }
     if (!gameOver) {
-        birdie.body.velocity.y = -FLAP;
+        birdie.body.velocity.y = -FLAP*3;
         flapSnd.play();
     }
 }
@@ -295,14 +298,12 @@ function addScore(_, inv) {
 
 function setGameOver() {
     gameOver = true;
-    instText.setText("TOUCH BIRDIE\nTO TRY AGAIN");
+    instText.setText("SAY \"GO\" BIRDIE\nTO TRY AGAIN");
     instText.renderable = true;
     var hiscore = window.localStorage.getItem('hiscore');
     hiscore = hiscore ? hiscore : score;
     hiscore = score > parseInt(hiscore, 10) ? score : hiscore;
     window.localStorage.setItem('hiscore', hiscore);
-    gameOverText.setText(slides[gameOvers]);
-    gameOverText.renderable = true;
     // Stop all fingers
     fingers.forEachAlive(function(finger) {
         finger.body.velocity.x = 0;
@@ -315,13 +316,13 @@ function setGameOver() {
     // Make birdie reset the game
     birdie.events.onInputDown.addOnce(reset);
     hurtSnd.play();
-    gameOvers++;
 }
 
 function update() {
     if (gameStarted) {
         // Make birdie dive
-        var dvy = FLAP + birdie.body.velocity.y;
+        birdie.body.velocity.y =  birdie.body.velocity.y * 0.5;
+        var dvy = FLAP + birdie.body.velocity.y * 2;
         birdie.angle = (90 * dvy / FLAP) - 180;
         if (birdie.angle < -30) {
             birdie.angle = -30;
@@ -366,6 +367,7 @@ function update() {
         });
         // Update finger timer
         fingersTimer.update();
+
     } else {
         birdie.y = (game.world.height / 2) + 8 * Math.cos(game.time.now / 200);
     }
@@ -411,16 +413,60 @@ function render() {
 
 function onKeyDown(e) { }
 
+
+function onKeyUp(e) { }
+
 var pressTime = 0;
-function onKeyUp(e) {
-    if (Phaser.Keyboard.SPACEBAR == e.keyCode) {
-        if (game.time.now - pressTime < 200) {
+function onVoice(){
+   // console.log(dir);
+   if(gameOver){
+    reset();
+   } else{
+    if (game.time.now - pressTime < 200) {
             cobraMode = 1000;
         } else {
             flap();
         }
         pressTime = game.time.now;
-    }
+   }
+    
+}
+
+function makeVoice(){
+    if (!('webkitSpeechRecognition' in window)) {
+        alert('Web speech API is not supported in this browser');
+      } 
+    else {
+
+        // Speech recognizer init
+        var recognizer = new webkitSpeechRecognition();
+
+        // continously listen to speech
+        recognizer.continuous = true;
+
+        // set languages supported
+        recognizer.lang = ['English', ['en-US', 'United States']];
+
+        // We return non-final strings so gameplay isn't laggy
+        recognizer.interimResults = false;
+
+        recognizer.onresult = function(e) {
+
+        // set variable 
+        
+          
+                // console.log("??? caught audio");
+                 // if the object isn't moving, allow commands to be sent down.
+                 onVoice();
+              
+            
+           
+    
+        };
+      // start speech to text translation
+      recognizer.start();
+
+   }
 }
 
 };
