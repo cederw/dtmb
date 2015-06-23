@@ -99,7 +99,7 @@ function create() {
     credits = game.add.text(
         game.world.width / 2,
         10,
-        'github.com/cederw',
+        'github.com/cederw/dyamb',
         {
             font: '8px "Press Start 2P"',
             fill: '#fff',
