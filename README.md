@@ -18,7 +18,7 @@ Contact me if you beat the high score
 
 Currently only works on Google Chrome.
 
-[Open in Google Chrome](http://marksteve.com/dtmb)
+[Open in Google Chrome](http://walterceder.me/dyamb)
 
 
 Originally by Mark Steve, modified by Walter Ceder
